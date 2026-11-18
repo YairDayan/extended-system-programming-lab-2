@@ -1,6 +1,7 @@
 # Build artifacts
 myshell
 looper
+mypipe
 *.o
 *.out
 *.dSYM/
