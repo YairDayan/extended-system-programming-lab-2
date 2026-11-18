@@ -55,6 +55,15 @@ int main(int argc, char **argv)
       freeCmdLines(parsedLine);
       return 0;
     }
+    if (strcmp(parsedLine->arguments[0], "cd") == 0) {
+      if (parsedLine->argCount < 2) {
+        fprintf(stderr, "cd: missing argument\n");
+      } else if (chdir(parsedLine->arguments[1]) == -1) {
+        perror("cd");
+      }
+      freeCmdLines(parsedLine);
+      continue;
+    }
     pid = fork();
     if (pid == 0) {
       execute(parsedLine);
