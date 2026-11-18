@@ -1,0 +1,11 @@
+# Build artifacts
+myshell
+looper
+*.o
+*.out
+*.dSYM/
+
+# Course materials / local notes
+*.pdf
+.cursor/
+.DS_Store
