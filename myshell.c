@@ -7,6 +7,7 @@
 #endif
 #include "LineParser.h"
 #include <string.h>
+#include <sys/wait.h>
 #include <stdlib.h>
 
 void execute(cmdLine *pCmdLine)
@@ -71,6 +72,9 @@ int main(int argc, char **argv)
     if (debug) {
       fprintf(stderr, "PID: %d\n", pid);
       fprintf(stderr, "Executing command: %s\n", parsedLine->arguments[0]);
+    }
+    if (parsedLine->blocking) {
+      waitpid(pid, NULL, 0);
     }
     freeCmdLines(parsedLine);
   }
