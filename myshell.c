@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <unistd.h>
+#ifdef __linux__
+#include <linux/limits.h>
+#else
+#include <limits.h>
+#endif
+#include "LineParser.h"
+#include <string.h>
+#include <stdlib.h>
+
+void execute(cmdLine *pCmdLine)
+{
+  execvp(pCmdLine->arguments[0], (char **)pCmdLine->arguments);
+  perror("execvp failed");
+  exit(1);
+}
+
+int main(int argc, char **argv)
+{
+  char path[PATH_MAX];
+  char input[2048];
+  cmdLine *parsedLine;
+
+  while (1) {
+    if (getcwd(path, PATH_MAX) == NULL) {
+      perror("getcwd");
+      return 1;
+    }
+
+    printf("%s> ", path);
+    fflush(stdout);
+
+    if (fgets(input, 2048, stdin) == NULL) {
+      break;
+    }
+
+    parsedLine = parseCmdLines(input);
+    if (parsedLine == NULL) {
+      continue;
+    }
+    if (parsedLine->argCount == 0) {
+      freeCmdLines(parsedLine);
+      continue;
+    }
+    if (strcmp(parsedLine->arguments[0], "quit") == 0) {
+      freeCmdLines(parsedLine);
+      return 0;
+    }
+    execute(parsedLine);
+    freeCmdLines(parsedLine);
+  }
+
+  return 0;
+}
