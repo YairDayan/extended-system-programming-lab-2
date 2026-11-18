@@ -1,10 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
-#ifdef __linux__
 #include <linux/limits.h>
-#else
-#include <limits.h>
-#endif
 #include "LineParser.h"
 #include <string.h>
 #include <sys/wait.h>
