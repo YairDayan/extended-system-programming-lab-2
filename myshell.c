@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdlib.h>
 
 void execute(cmdLine *pCmdLine)
@@ -31,6 +32,34 @@ void execute(cmdLine *pCmdLine)
   execvp(pCmdLine->arguments[0], (char **)pCmdLine->arguments);
   perror("execvp failed");
   _exit(1);
+}
+
+int signalCommand(cmdLine *pCmdLine)
+{
+  int sig;
+  int target;
+  if (strcmp(pCmdLine->arguments[0], "zzzz") == 0) {
+    sig = SIGSTOP;
+  } else if (strcmp(pCmdLine->arguments[0], "kuku") == 0) {
+    sig = SIGCONT;
+  } else if (strcmp(pCmdLine->arguments[0], "blast") == 0) {
+    sig = SIGINT;
+  } else {
+    return 0;
+  }
+  if (pCmdLine->argCount < 2) {
+    fprintf(stderr, "%s: missing process id\n", pCmdLine->arguments[0]);
+    return 1;
+  }
+  target = atoi(pCmdLine->arguments[1]);
+  if (target <= 0) {
+    fprintf(stderr, "%s: invalid process id\n", pCmdLine->arguments[0]);
+    return 1;
+  }
+  if (kill(target, sig) == -1) {
+    perror("kill");
+  }
+  return 1;
 }
 
 int main(int argc, char **argv)
@@ -78,6 +107,10 @@ int main(int argc, char **argv)
       } else if (chdir(parsedLine->arguments[1]) == -1) {
         perror("cd");
       }
+      freeCmdLines(parsedLine);
+      continue;
+    }
+    if (signalCommand(parsedLine)) {
       freeCmdLines(parsedLine);
       continue;
     }
