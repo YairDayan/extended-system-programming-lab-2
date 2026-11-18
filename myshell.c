@@ -13,7 +13,7 @@ void execute(cmdLine *pCmdLine)
 {
   execvp(pCmdLine->arguments[0], (char **)pCmdLine->arguments);
   perror("execvp failed");
-  exit(1);
+  _exit(1);
 }
 
 int main(int argc, char **argv)
@@ -21,7 +21,15 @@ int main(int argc, char **argv)
   char path[PATH_MAX];
   char input[2048];
   cmdLine *parsedLine;
+  pid_t pid;
+  int debug = 0;
+  int i;
 
+  for (i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-d") == 0) {
+      debug = 1;
+    }
+  }
   while (1) {
     if (getcwd(path, PATH_MAX) == NULL) {
       perror("getcwd");
@@ -47,7 +55,14 @@ int main(int argc, char **argv)
       freeCmdLines(parsedLine);
       return 0;
     }
-    execute(parsedLine);
+    pid = fork();
+    if (pid == 0) {
+      execute(parsedLine);
+    }
+    if (debug) {
+      fprintf(stderr, "PID: %d\n", pid);
+      fprintf(stderr, "Executing command: %s\n", parsedLine->arguments[0]);
+    }
     freeCmdLines(parsedLine);
   }
 
