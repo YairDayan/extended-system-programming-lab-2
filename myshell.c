@@ -8,10 +8,26 @@
 #include "LineParser.h"
 #include <string.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 #include <stdlib.h>
 
 void execute(cmdLine *pCmdLine)
 {
+  if (pCmdLine->inputRedirect) {
+    close(0);
+    if (open(pCmdLine->inputRedirect, O_RDONLY) == -1) {
+      perror("input redirect");
+      _exit(1);
+    }
+  }
+  if (pCmdLine->outputRedirect) {
+    close(1);
+    if (open(pCmdLine->outputRedirect, O_WRONLY | O_CREAT | O_TRUNC, 0644) == -1) {
+      perror("output redirect");
+      _exit(1);
+    }
+  }
+
   execvp(pCmdLine->arguments[0], (char **)pCmdLine->arguments);
   perror("execvp failed");
   _exit(1);
